@@ -8,7 +8,7 @@ export const extractMCQsFromImages = async (
   // Initialize AI inside the function to ensure it uses the latest environment variables
 // @ts-ignore - bypassing type check to allow baseUrl for OpenRouter
 const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY || '', 
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY || '', 
   baseUrl: "https://openrouter.ai/api/v1" 
 } as any);
   
