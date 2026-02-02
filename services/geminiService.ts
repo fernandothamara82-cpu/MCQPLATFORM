@@ -6,8 +6,11 @@ export const extractMCQsFromImages = async (
   markingSchemeImages: string[] = []
 ): Promise<Question[]> => {
   // Initialize AI inside the function to ensure it uses the latest environment variables
+// @ts-ignore - bypassing type check to allow baseUrl for OpenRouter
 const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY || '',
+  apiKey: process.env.GEMINI_API_KEY || '', 
+  baseUrl: "https://openrouter.ai/api/v1" 
+} as any);
   baseUrl: "https://openrouter.ai/api/v1" 
 });
   const promptText = `
