@@ -11,8 +11,7 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || '', 
   baseUrl: "https://openrouter.ai/api/v1" 
 } as any);
-  baseUrl: "https://openrouter.ai/api/v1" 
-});
+  
   const promptText = `
     Analyze the provided images of a Physics or Chemistry exam paper.
     Convert them into a clean JSON array of MCQ questions.
@@ -44,7 +43,7 @@ const ai = new GoogleGenAI({
   const parts = prepareParts(paperImages, markingSchemeImages);
 
   const result = await ai.models.generateContent({
-    model: "google/gemini-2.0-flash-exp:free",
+model: 'google/gemini-2.0-flash-exp:free',
     contents: { parts },
     config: {
       responseMimeType: "application/json",
