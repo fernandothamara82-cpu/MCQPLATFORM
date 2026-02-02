@@ -9,7 +9,8 @@ export const extractMCQsFromImages = async (
 // @ts-ignore - bypassing type check to allow baseUrl for OpenRouter
 const ai = new GoogleGenAI({ 
   apiKey: import.meta.env.VITE_GEMINI_API_KEY || '', 
-  baseUrl: "https://openrouter.ai/api/v1" 
+  // We point to our new Netlify proxy path
+  baseUrl: window.location.origin + "/api/ai"
 } as any);
   
   const promptText = `
