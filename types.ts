@@ -16,7 +16,7 @@ export interface Question {
   correctAnswerIndices: number[];
   explanation: string;
   subject: 'Physics' | 'Chemistry' | 'General';
-  hasVisualElements: boolean; // New flag
+  hasVisualElements: boolean;
   diagram?: DiagramInfo;
   markingSchemeData?: {
     originalValue: string;
@@ -34,12 +34,14 @@ export interface QuizResult {
 export interface QuizHistoryItem {
   id: string;
   timestamp: number;
+  quizTitle: string;
   subject: string;
   score: number;
   totalQuestions: number;
   questions: Question[];
   results: QuizResult[];
   sourceImages: string[];
+  markingImages?: string[];
 }
 
 export enum AppState {

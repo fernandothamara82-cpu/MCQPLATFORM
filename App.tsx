@@ -11,11 +11,13 @@ import StudentDashboard from './components/StudentDashboard';
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const [sourceImages, setSourceImages] = useState<string[]>([]);
+  const [sourceMarkingImages, setSourceMarkingImages] = useState<string[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [results, setResults] = useState<QuizResult[]>([]);
   const [history, setHistory] = useState<QuizHistoryItem[]>([]);
   const [error, setError] = useState<{ message: string; isQuota: boolean } | null>(null);
   const [quizTimeLimit, setQuizTimeLimit] = useState(30);
+  const [activeQuizTitle, setActiveQuizTitle] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem('quiz_history');
@@ -28,10 +30,12 @@ const AppContent: React.FC = () => {
     }
   }, []);
 
-  const handleImagesSelected = async (paper: string[], marking: string[], timeLimit: number) => {
+  const handleImagesSelected = async (paper: string[], marking: string[], timeLimit: number, title: string) => {
     setQuizTimeLimit(timeLimit);
+    setActiveQuizTitle(title || `Test ${new Date().toLocaleDateString()}`);
     navigate('/processing');
     setSourceImages(paper);
+    setSourceMarkingImages(marking);
     setError(null);
     try {
       const extractedQuestions = await extractMCQsFromImages(paper, marking);
@@ -61,12 +65,14 @@ const AppContent: React.FC = () => {
     const newItem: QuizHistoryItem = {
       id: `quiz-${Date.now()}`,
       timestamp: Date.now(),
+      quizTitle: activeQuizTitle,
       subject: questions[0]?.subject || 'General',
       score: correctCount,
       totalQuestions: questions.length,
       questions: questions,
       results: quizResults,
-      sourceImages: sourceImages
+      sourceImages: sourceImages,
+      markingImages: sourceMarkingImages
     };
 
     const newHistory = [...history, newItem];
@@ -79,7 +85,14 @@ const AppContent: React.FC = () => {
     setQuestions(item.questions);
     setResults(item.results);
     setSourceImages(item.sourceImages);
+    setSourceMarkingImages(item.markingImages || []);
     navigate('/results');
+  };
+
+  const handleDeleteRecord = (id: string) => {
+    const newHistory = history.filter(item => item.id !== id);
+    setHistory(newHistory);
+    localStorage.setItem('quiz_history', JSON.stringify(newHistory));
   };
 
   const restart = () => {
@@ -92,12 +105,12 @@ const AppContent: React.FC = () => {
       <header className="sticky top-0 z-30 glass border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={restart}>
-            <div className="bg-blue-600 p-2 rounded-lg text-white font-black">AI</div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none">PhysChem MCQ</h1>
+            <div className="bg-blue-600 p-2 rounded-lg text-white font-black shadow-lg shadow-blue-100">MCQ</div>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none">Personal Library</h1>
           </div>
           <div className="flex items-center space-x-6">
-            <button onClick={() => navigate('/')} className="text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors">Dashboard</button>
-            <button onClick={() => navigate('/new')} className="text-sm font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-xl hover:bg-blue-100 transition-all">New Quiz</button>
+            <button onClick={() => navigate('/')} className="text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors">My Records</button>
+            <button onClick={() => navigate('/new')} className="text-sm font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-xl hover:bg-blue-100 transition-all">New Test</button>
           </div>
         </div>
       </header>
@@ -117,17 +130,17 @@ const AppContent: React.FC = () => {
         )}
 
         <Routes>
-          <Route path="/" element={<StudentDashboard history={history} onNewQuiz={() => navigate('/new')} onReviewQuiz={handleReviewQuiz} />} />
+          <Route path="/" element={<StudentDashboard history={history} onNewQuiz={() => navigate('/new')} onReviewQuiz={handleReviewQuiz} onDeleteRecord={handleDeleteRecord} />} />
           <Route path="/new" element={<FileUpload onImagesSelected={handleImagesSelected} />} />
           <Route path="/processing" element={<LoadingScreen />} />
-          <Route path="/quiz" element={<QuizRunner questions={questions} sourceImages={sourceImages} timeLimit={quizTimeLimit} onComplete={handleQuizComplete} />} />
-          <Route path="/results" element={<ResultsView questions={questions} results={results} sourceImages={sourceImages} onRestart={restart} />} />
+          <Route path="/quiz" element={<QuizRunner questions={questions} sourceImages={sourceImages} markingImages={sourceMarkingImages} timeLimit={quizTimeLimit} onComplete={handleQuizComplete} />} />
+          <Route path="/results" element={<ResultsView questions={questions} results={results} sourceImages={sourceImages} markingImages={sourceMarkingImages} onRestart={restart} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
       
       <footer className="py-8 text-center border-t border-slate-100 mt-auto">
-        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">Optimized for Free Tier • Powered by Gemini AI</p>
+        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">Personal Study Archive • Local Data Privacy</p>
       </footer>
     </div>
   );

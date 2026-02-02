@@ -28,7 +28,14 @@ const QuestionReference: React.FC<QuestionReferenceProps> = ({ diagram, sourceIm
 
   if (!imageUrl || !boundingBox) return null;
 
-  const [ymin, xmin, ymax, xmax] = boundingBox;
+  // Add a small safety margin (20 units out of 1000) around the AI bounding box 
+  // to ensure the "full view" of the question text/numbers is visible.
+  const margin = 20;
+  const ymin = Math.max(0, boundingBox[0] - margin);
+  const xmin = Math.max(0, boundingBox[1] - margin);
+  const ymax = Math.min(1000, boundingBox[2] + margin);
+  const xmax = Math.min(1000, boundingBox[3] + margin);
+
   const width = Math.max(xmax - xmin, 1);
   const height = Math.max(ymax - ymin, 1);
   const snippetAspectRatio = width / height;
@@ -54,7 +61,7 @@ const QuestionReference: React.FC<QuestionReferenceProps> = ({ diagram, sourceIm
   return (
     <div className="my-6">
       <div className="flex justify-between items-center mb-3 px-1">
-        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Document Snippet</span>
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Original Document Reference</span>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="text-[10px] text-blue-600 font-bold hover:underline uppercase"
@@ -75,10 +82,13 @@ const QuestionReference: React.FC<QuestionReferenceProps> = ({ diagram, sourceIm
             backgroundPosition: `${posX}% ${posY}%`,
             backgroundSize: `${100000 / width}% ${100000 / height}%`,
             backgroundRepeat: 'no-repeat',
-            maxHeight: '300px'
+            maxHeight: '500px'
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent pointer-events-none" />
+        <div className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-md px-2 py-1 rounded text-[8px] font-black text-slate-500 border border-slate-100 uppercase tracking-tighter shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+          Scan Extract
+        </div>
       </div>
 
       {isModalOpen && <ModalView imageUrl={imageUrl} ymin={ymin} xmin={xmin} ymax={ymax} xmax={xmax} sourceImageIndex={sourceImageIndex} onClose={() => setIsModalOpen(false)} />}
@@ -105,24 +115,24 @@ const ModalView: React.FC<ModalViewProps> = ({ imageUrl, ymin, xmin, ymax, xmax,
     if (highlightRef.current && containerRef.current) {
       setTimeout(() => {
         highlightRef.current?.scrollIntoView({
-          behavior: 'instant',
+          behavior: 'auto', // Instant jump instead of scrolling
           block: 'center',
           inline: 'center'
         });
-      }, 100);
+      }, 50); // Minimal delay
     }
   }, []);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-12 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md cursor-pointer" onClick={onClose} />
-      <div className="relative w-full h-full max-w-5xl flex flex-col pointer-events-none">
+      <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-md cursor-pointer" onClick={onClose} />
+      <div className="relative w-full h-full max-w-6xl flex flex-col pointer-events-none">
         <div className="flex justify-between items-center mb-4 pointer-events-auto">
           <div className="text-white">
             <p className="text-[10px] font-black uppercase tracking-widest opacity-50">Page {sourceImageIndex + 1}</p>
-            <h4 className="font-bold text-lg">Source Verification</h4>
+            <h4 className="font-bold text-lg">Original Paper Context</h4>
           </div>
-          <button onClick={onClose} className="bg-white/10 hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all border border-white/10">
+          <button onClick={onClose} className="bg-white/10 hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all border border-white/10 shadow-xl">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -135,18 +145,14 @@ const ModalView: React.FC<ModalViewProps> = ({ imageUrl, ymin, xmin, ymax, xmax,
             <div className="absolute inset-0 pointer-events-none">
               <div 
                 ref={highlightRef}
-                className="absolute border-4 border-blue-500 rounded-lg ring-4 ring-blue-500/30"
+                className="absolute border-2 border-blue-500 rounded ring-4 ring-blue-500/20"
                 style={{
                   top: `${ymin / 10}%`,
                   left: `${xmin / 10}%`,
                   width: `${(xmax - xmin) / 10}%`,
                   height: `${(ymax - ymin) / 10}%`,
                 }}
-              >
-                <div className="absolute -top-10 left-0 bg-blue-600 text-white px-3 py-1 rounded-t-lg text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
-                  Selected Question Area
-                </div>
-              </div>
+              />
             </div>
           </div>
         </div>

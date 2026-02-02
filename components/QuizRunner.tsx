@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Question, QuizResult } from '../types';
 import QuestionReference from './QuestionReference';
+import SourceGallery from './SourceGallery';
 
 interface QuizRunnerProps {
   questions: Question[];
   sourceImages: string[];
+  markingImages: string[];
   timeLimit: number;
   onComplete: (results: QuizResult[]) => void;
 }
 
-const QuizRunner: React.FC<QuizRunnerProps> = ({ questions, sourceImages, timeLimit, onComplete }) => {
+const QuizRunner: React.FC<QuizRunnerProps> = ({ questions, sourceImages, markingImages, timeLimit, onComplete }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[][]>(new Array(questions.length).fill([]));
   const [secondsRemaining, setSecondsRemaining] = useState(timeLimit * 60);
   const [isFinished, setIsFinished] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   
   const q = questions[currentIndex];
   const progress = ((currentIndex + 1) / questions.length) * 100;
@@ -77,8 +80,15 @@ const QuizRunner: React.FC<QuizRunnerProps> = ({ questions, sourceImages, timeLi
       <div className="mb-6 flex justify-between items-end px-2">
         <div>
           <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Question {q.questionNumber || currentIndex + 1}</span>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <span className="text-sm font-bold text-blue-600">{currentIndex + 1} / {questions.length}</span>
+            <button 
+              onClick={() => setIsGalleryOpen(true)}
+              className="bg-slate-200 hover:bg-slate-300 text-[10px] font-black text-slate-600 px-3 py-1 rounded-full uppercase transition-colors flex items-center space-x-1"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              <span>Reference Papers</span>
+            </button>
           </div>
         </div>
         <div className="flex flex-col items-end">
@@ -142,6 +152,15 @@ const QuizRunner: React.FC<QuizRunnerProps> = ({ questions, sourceImages, timeLi
           </button>
         </div>
       </div>
+
+      {isGalleryOpen && (
+        <SourceGallery 
+          paperImages={sourceImages} 
+          markingImages={markingImages} 
+          highlight={q.diagram ? { sourceImageIndex: q.diagram.sourceImageIndex, boundingBox: q.diagram.boundingBox } : undefined}
+          onClose={() => setIsGalleryOpen(false)} 
+        />
+      )}
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import CropModal from './CropModal';
 
 interface FileUploadProps {
-  onImagesSelected: (paperImages: string[], markingImages: string[], timeLimitMinutes: number) => void;
+  onImagesSelected: (paperImages: string[], markingImages: string[], timeLimitMinutes: number, title: string) => void;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({ onImagesSelected }) => {
@@ -10,6 +10,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onImagesSelected }) => {
   const [markingPreviews, setMarkingPreviews] = useState<string[]>([]);
   const [isReading, setIsReading] = useState(false);
   const [timeLimit, setTimeLimit] = useState(30);
+  const [testTitle, setTestTitle] = useState('');
   const [cropTarget, setCropTarget] = useState<{ idx: number, type: 'paper' | 'marking', src: string } | null>(null);
 
   const readFileAsDataURL = (file: File): Promise<string> => {
@@ -65,8 +66,21 @@ const FileUpload: React.FC<FileUploadProps> = ({ onImagesSelected }) => {
       <div className="text-center">
         <h2 className="text-5xl font-black text-slate-900 mb-3 tracking-tighter">MCQ Platform</h2>
         <p className="text-slate-500 max-w-lg mx-auto font-medium">
-          Transform physical Physics & Chemistry papers into digital interactive quizzes. Refine images to improve Sinhala OCR.
+          Transform your paper-based exams into interactive digital assessments for personal study.
         </p>
+      </div>
+
+      <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100 mb-8">
+        <div className="max-w-md mx-auto">
+          <h3 className="text-center text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Assessment Details</h3>
+          <input 
+            type="text" 
+            placeholder="Test Title (e.g. Physics 2024 Paper 1)"
+            value={testTitle}
+            onChange={(e) => setTestTitle(e.target.value)}
+            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-500 focus:bg-white transition-all text-center text-lg font-bold outline-none"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -74,7 +88,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onImagesSelected }) => {
         <div className="bg-white p-6 rounded-[2rem] shadow-xl border border-slate-100 flex flex-col">
           <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
             <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center mr-4 shadow-lg shadow-blue-100 italic">1</div>
-            Question Paper
+            Exam Pages
           </h3>
           <label className="block w-full cursor-pointer group">
             <div className="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center group-hover:border-blue-400 transition-all bg-slate-50 group-hover:bg-blue-50/30">
@@ -114,14 +128,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onImagesSelected }) => {
           <div className="bg-white p-6 rounded-[2rem] shadow-xl border border-slate-100 flex flex-col">
             <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
               <div className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center mr-4 shadow-lg shadow-emerald-100 italic">2</div>
-              Marking Scheme <span className="text-slate-400 font-normal ml-2 italic text-sm">Optional</span>
+              Reference Answer <span className="text-slate-400 font-normal ml-2 italic text-sm">Optional</span>
             </h3>
             <label className="block w-full cursor-pointer group">
               <div className="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center group-hover:border-emerald-400 transition-all bg-slate-50 group-hover:bg-emerald-50/30">
                 <div className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
-                <span className="text-sm font-black text-slate-600 uppercase tracking-widest">Add Scheme</span>
+                <span className="text-sm font-black text-slate-600 uppercase tracking-widest">Add Guide</span>
                 <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, 'marking')} />
               </div>
             </label>
@@ -148,10 +162,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onImagesSelected }) => {
           <div className="bg-white p-6 rounded-[2rem] shadow-xl border border-slate-100">
             <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
               <div className="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center mr-4 shadow-lg shadow-amber-100 italic">3</div>
-              Quiz Timer
+              Practice Time
             </h3>
             <div className="space-y-4">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Duration (Minutes)</p>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Minutes</p>
               <div className="flex items-center space-x-4">
                 <input 
                   type="range" 
@@ -163,17 +177,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onImagesSelected }) => {
                 />
                 <span className="w-12 text-center font-black text-slate-800">{timeLimit}</span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {[15, 30, 45, 60, 90, 120].map(m => (
-                  <button 
-                    key={m}
-                    onClick={() => setTimeLimit(m)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all ${timeLimit === m ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                  >
-                    {m}m
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         </div>
@@ -181,13 +184,15 @@ const FileUpload: React.FC<FileUploadProps> = ({ onImagesSelected }) => {
 
       <div className="flex flex-col items-center space-y-4 pt-4">
         <button
-          onClick={() => onImagesSelected(paperPreviews, markingPreviews, timeLimit)}
+          onClick={() => onImagesSelected(paperPreviews, markingPreviews, timeLimit, testTitle)}
           disabled={paperPreviews.length === 0 || isReading}
           className="px-16 py-5 bg-slate-900 text-white rounded-[1.5rem] font-black text-xl hover:bg-slate-800 disabled:bg-slate-200 transition-all shadow-2xl active:scale-95 flex items-center space-x-3"
         >
-          {isReading ? 'Reading Files...' : 'Analyze & Generate Quiz'}
+          {isReading ? 'Processing...' : 'Start Assessment'}
         </button>
-        <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Powered by Gemini 3.0 Vision AI</p>
+        <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
+          Ready to generate your interactive practice session
+        </p>
       </div>
 
       {cropTarget && (
