@@ -44,7 +44,8 @@ const ai = new GoogleGenAI({
   const parts = prepareParts(paperImages, markingSchemeImages);
 
   const result = await ai.models.generateContent({
-model: 'google/gemini-2.0-flash-exp:free',    contents: { parts },
+model: 'gemini-3-flash-preview',
+    contents: { parts },
     config: {
       responseMimeType: "application/json",
       responseSchema: {
