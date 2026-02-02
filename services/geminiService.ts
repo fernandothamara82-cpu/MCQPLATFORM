@@ -7,9 +7,9 @@ export const extractMCQsFromImages = async (
 ): Promise<Question[]> => {
   // Initialize AI inside the function to ensure it uses the latest environment variables
 // @ts-ignore - bypassing type check to allow baseUrl for OpenRouter
+// @ts-ignore - bypassing type check for OpenRouter proxy
 const ai = new GoogleGenAI({ 
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY || '', 
-  // We point to our new Netlify proxy path
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
   baseUrl: window.location.origin + "/api/ai"
 } as any);
   
@@ -44,8 +44,7 @@ const ai = new GoogleGenAI({
   const parts = prepareParts(paperImages, markingSchemeImages);
 
   const result = await ai.models.generateContent({
-model: 'google/gemini-2.0-flash-exp:free',
-    contents: { parts },
+model: 'google/gemini-2.0-flash-exp:free',    contents: { parts },
     config: {
       responseMimeType: "application/json",
       responseSchema: {
