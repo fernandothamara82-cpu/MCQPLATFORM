@@ -1,0 +1,7 @@
+{
+  "name": "PhysChem MCQ Transformer",
+  "description": "Transform photos of Physics and Chemistry exam papers into interactive digital quizzes using AI-powered OCR and reasoning.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
