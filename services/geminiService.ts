@@ -8,10 +8,19 @@ export const extractMCQsFromImages = async (
   // Initialize AI inside the function to ensure it uses the latest environment variables
 // @ts-ignore - bypassing type check to allow baseUrl for OpenRouter
 // @ts-ignore - bypassing type check for OpenRouter proxy
+// 1. Point the SDK to your Netlify Proxy
+// @ts-ignore
 const ai = new GoogleGenAI({ 
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
-  baseUrl: window.location.origin + "/api/ai"
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY || '', 
+  // This tells the SDK: "Go to my site's tunnel, not Google"
+  baseUrl: window.location.origin + "/api/ai" 
 } as any);
+
+// 2. Use the OpenRouter-specific Model Name
+// Note: OpenRouter names for Gemini 3 differ from Google's names
+const model = ai.getGenerativeModel({ 
+  model: "google/gemini-3-flash-preview:free" 
+});
   
   const promptText = `
     Analyze the provided images of a Physics or Chemistry exam paper.
