@@ -6,8 +6,10 @@ export const extractMCQsFromImages = async (
   markingSchemeImages: string[] = []
 ): Promise<Question[]> => {
   // Initialize AI inside the function to ensure it uses the latest environment variables
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-
+const ai = new GoogleGenAI({ 
+  apiKey: process.env.GEMINI_API_KEY || '',
+  baseUrl: "https://openrouter.ai/api/v1" 
+});
   const promptText = `
     Analyze the provided images of a Physics or Chemistry exam paper.
     Convert them into a clean JSON array of MCQ questions.
@@ -39,7 +41,7 @@ export const extractMCQsFromImages = async (
   const parts = prepareParts(paperImages, markingSchemeImages);
 
   const result = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: "google/gemini-2.0-flash-exp:free",
     contents: { parts },
     config: {
       responseMimeType: "application/json",
